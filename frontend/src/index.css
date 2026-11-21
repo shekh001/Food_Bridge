@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #F6F5F1;
+  color: #1C2321;
+  font-family: 'Inter', sans-serif;
+}
+
+::selection {
+  background-color: #F2A93B;
+  color: #1C2321;
+}
+
+/* Signature element: the Rescue Rail — a literal status track used for the
+   listing pipeline (posted -> claimed -> picked up -> delivered) both as a
+   compact chip and as a full progress rail on listing detail pages. */
+.rescue-rail {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.rescue-rail .node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.rescue-rail .dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid #DAD6CB;
+  background: #F6F5F1;
+  transition: all 0.25s ease;
+}
+.rescue-rail .track {
+  flex: 1;
+  height: 2px;
+  background: #DAD6CB;
+  transition: background 0.25s ease;
+}
+.rescue-rail .node.done .dot {
+  background: #2F6F4E;
+  border-color: #2F6F4E;
+}
+.rescue-rail .node.active .dot {
+  background: #F2A93B;
+  border-color: #F2A93B;
+  box-shadow: 0 0 0 4px #FCEBCB;
+}
+.rescue-rail .track.done {
+  background: #2F6F4E;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid #2F6F4E;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Landing page's live-activity strip — a continuous, seamless scroll. The
+   track renders the activity list twice back-to-back and shifts exactly
+   half its own width, so the loop point is invisible. */
+.marquee-track {
+  animation: marquee-scroll 28s linear infinite;
+}
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Toast notifications — slide + fade in from the edge they anchor to,
+   rather than snapping into existence. Exit is handled by NotificationToast
+   adding .toast-leaving just before removing the item from state. */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.toast-enter {
+  animation: toast-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.toast-leaving {
+  opacity: 0;
+  transform: translateX(12px) scale(0.97);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}

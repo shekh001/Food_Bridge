@@ -1,0 +1,90 @@
+### FoodBridge API — manual smoke tests
+### Install the "REST Client" VS Code extension (humao.rest-client), then click
+### "Send Request" above any block below. Run `npm run seed` first so these logins exist.
+
+@baseUrl = http://localhost:5000/api
+
+### 1. Health check — should return { status: "ok" }
+GET {{baseUrl}}/health
+
+### 2. Login as a donor — copy the returned token into @donorToken below
+# @name donorLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "donor1@foodbridge.app",
+  "password": "password123"
+}
+
+### 3. Login as an NGO — copy the returned token into @ngoToken below
+# @name ngoLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "ngo1@foodbridge.app",
+  "password": "password123"
+}
+
+@donorToken = PASTE_DONOR_TOKEN_HERE
+@ngoToken = PASTE_NGO_TOKEN_HERE
+
+### 4. Donor posts a new listing
+POST {{baseUrl}}/listings
+Authorization: Bearer {{donorToken}}
+Content-Type: application/json
+
+{
+  "foodType": "Test batch — samosas",
+  "description": "Manual smoke test listing",
+  "quantityKg": 5,
+  "expiryAt": "2026-12-31T18:00:00.000Z",
+  "pickupLocation": { "address": "Connaught Place, New Delhi", "lat": 28.6315, "lng": 77.2167 }
+}
+
+### 5. NGO browses open listings
+GET {{baseUrl}}/listings?status=posted
+Authorization: Bearer {{ngoToken}}
+
+### 6. NGO claims a listing — replace LISTING_ID with an _id from step 5
+POST {{baseUrl}}/listings/LISTING_ID/claim
+Authorization: Bearer {{ngoToken}}
+
+### 7. Mark picked up (as the claiming NGO)
+PATCH {{baseUrl}}/listings/LISTING_ID/status
+Authorization: Bearer {{ngoToken}}
+Content-Type: application/json
+
+{ "status": "picked_up" }
+
+### 8. Mark delivered (donor or NGO)
+PATCH {{baseUrl}}/listings/LISTING_ID/status
+Authorization: Bearer {{donorToken}}
+Content-Type: application/json
+
+{ "status": "delivered" }
+
+### 9. Download the free single-donation certificate (opens as binary PDF — use "Save Response Body")
+GET {{baseUrl}}/certificates/LISTING_ID
+Authorization: Bearer {{donorToken}}
+
+### 10. Try the Pro-only consolidated CSR report — should 402 unless donor.plan === 'pro'
+GET {{baseUrl}}/certificates/csr-report
+Authorization: Bearer {{donorToken}}
+
+### 11. Check billing status
+GET {{baseUrl}}/billing/status
+Authorization: Bearer {{donorToken}}
+
+### 12. Demo-upgrade to Pro (only works when RAZORPAY_KEY_ID is NOT set)
+POST {{baseUrl}}/billing/confirm-demo-upgrade
+Authorization: Bearer {{donorToken}}
+
+### 13. NGO route optimizer (needs 2+ claimed/picked_up listings to be interesting)
+GET {{baseUrl}}/routes/optimize
+Authorization: Bearer {{ngoToken}}
+
+### 14. Demand hotspot predictions
+GET {{baseUrl}}/predictions/hotspots
+Authorization: Bearer {{ngoToken}}

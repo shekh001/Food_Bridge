@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: foodbridge-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: MONGO_URI
+        sync: false          # set in Render dashboard after creating a MongoDB Atlas cluster
+      - key: JWT_SECRET
+        generateValue: true  # Render auto-generates a strong random secret
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CLIENT_URL
+        sync: false          # set to your deployed Vercel/Netlify frontend URL
+      - key: VAPID_PUBLIC_KEY
+        sync: false          # optional — generate with: npx web-push generate-vapid-keys
+      - key: VAPID_PRIVATE_KEY
+        sync: false          # optional, pairs with VAPID_PUBLIC_KEY
+      - key: VAPID_SUBJECT
+        value: mailto:admin@foodbridge.app
+      - key: RAZORPAY_KEY_ID
+        sync: false          # optional — leave unset for demo/simulated upgrades. Get free TEST keys at dashboard.razorpay.com
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: SENTRY_DSN
+        sync: false          # optional — free at sentry.io, see README "How you'll know if something breaks"
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false          # optional — leave unset and uploads use local disk (wiped on every redeploy). Free forever at cloudinary.com
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
